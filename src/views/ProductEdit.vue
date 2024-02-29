@@ -115,13 +115,7 @@
             </div>
             <div class="col-md-12 mt-2">
               <label class="mb-1 fw-semibold">Description</label>
-              <textarea
-                cols="30"
-                rows="4"
-                class="form-control"
-                placeholder="Description"
-                v-model="req.description"
-              ></textarea>
+              <textarea id="description"></textarea>
               <div>
                 <small
                   class="text-danger size-12"
@@ -159,6 +153,7 @@ import DatePicker from "vue2-datepicker";
 import "vue2-datepicker/index.css";
 import noImage from "../assets/no-photo.png";
 import Api from "../api/Api";
+import $ from "jquery";
 
 export default {
   components: {
@@ -193,6 +188,13 @@ export default {
   created() {
     this.getProductDetail();
   },
+  mounted() {
+    $("#description").summernote({
+      placeholder: "Description",
+      tabsize: 2,
+      height: 230,
+    });
+  },
   methods: {
     uploadPhoto(event) {
       var input = event.target;
@@ -211,12 +213,14 @@ export default {
           var data = res.data.data;
           this.req = data;
           this.imagePhoto = res.data.data.images[0].image;
+          $("#description").summernote("code", data.description);
         })
         .catch((err) => {
           console.log(err);
         });
     },
     updateData() {
+      var description = $("#description").summernote("code");
       var data = new FormData();
 
       data.append("name", this.req.name);
@@ -224,7 +228,7 @@ export default {
       data.append("price", this.req.price);
       data.append("expired_date", this.req.expired_date);
       data.append("category_id", this.req.category_id);
-      data.append("description", this.req.description);
+      data.append("description", description);
       if (this.req.photo) {
         data.append("images[]", this.req.photo);
       }

@@ -113,7 +113,7 @@
                 <label class="mb-1 fw-semibold">Product Image</label>
               </div>
               <label type="file" :class="!imagePhoto ? 'upload__btn' : ''">
-                <img v-if="imagePhoto" class="photo" :src="driverPictureUrl" />
+                <img v-if="imagePhoto" class="photo" :src="productPictureUrl" />
                 <p v-else class="mb-0" style="color: #adb5bd">
                   <i class="fa fa-plus"></i>
                 </p>
@@ -137,13 +137,7 @@
             </div>
             <div class="col-md-12 mt-2">
               <label class="mb-1 fw-semibold">Description</label>
-              <textarea
-                cols="30"
-                rows="4"
-                class="form-control"
-                placeholder="Description"
-                v-model="req.description"
-              ></textarea>
+              <textarea id="description"></textarea>
               <div>
                 <small
                   class="text-danger size-12"
@@ -181,6 +175,7 @@ import DatePicker from "vue2-datepicker";
 import "vue2-datepicker/index.css";
 import noImage from "../assets/no-photo.png";
 import Api from "../api/Api";
+import $ from "jquery";
 
 export default {
   components: {
@@ -224,6 +219,13 @@ export default {
   created() {
     this.getCategories();
   },
+  mounted() {
+    $("#description").summernote({
+      placeholder: "Description",
+      tabsize: 2,
+      height: 230,
+    });
+  },
   methods: {
     uploadPhoto(event) {
       var input = event.target;
@@ -237,14 +239,14 @@ export default {
       }
     },
     storeData() {
+      var description = $("#description").summernote("code");
       var data = new FormData();
-
       data.append("name", this.req.name);
       data.append("stock", this.req.stock);
       data.append("price", this.req.price);
       data.append("expired_date", this.req.expired_date);
       data.append("category_id", this.req.category_id);
-      data.append("description", this.req.description);
+      data.append("description", description);
       if (this.req.photo) {
         data.append("images[]", this.req.photo);
       }
@@ -316,7 +318,7 @@ export default {
     },
   },
   computed: {
-    driverPictureUrl() {
+    productPictureUrl() {
       return this.imagePhoto.length > 0 ? this.imagePhoto : noImage;
     },
   },

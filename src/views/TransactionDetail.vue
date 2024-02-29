@@ -154,7 +154,6 @@ export default {
   padding: 14px;
 }
 .img-product-transaction {
-  border-radius: 10px;
   width: 20px;
   height: 29px;
   -o-object-fit: cover;

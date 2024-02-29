@@ -1014,3 +1014,87 @@ hr {
 .capitalize {
   text-transform: capitalize;
 }
+.modal-vue .overlay {
+  position: fixed;
+  z-index: 999;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  overflow-x: hidden;
+  overflow-y: auto;
+  outline: 0;
+}
+.modal-vue .modal-body-chat {
+  position: fixed;
+  width: 600px;
+  z-index: 999;
+  margin: 0 auto;
+  padding: 20px 30px;
+  background-color: #fff;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  top: 25px;
+  border-radius: 20px;
+}
+.modal-vue .modal-body-chat.vsm {
+  width: 350px;
+}
+.modal-vue .modal-body-chat.sm {
+  width: 450px;
+}
+.modal-vue .modal-body-chat.md {
+  width: 600px;
+}
+.modal-vue .modal-body-chat.lg {
+  width: 900px;
+}
+.plan input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+}
+.plan {
+  cursor: pointer;
+  width: 100%;
+}
+.plan .plan-content {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  // display: flex;
+  padding: 20px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  border: 1.9px solid #f4f6f7;
+  border-radius: 10px;
+  -webkit-transition: -webkit-box-shadow 0.4s;
+  transition: -webkit-box-shadow 0.4s;
+  -o-transition: box-shadow 0.4s;
+  transition: box-shadow 0.4s;
+  transition: box-shadow 0.4s, -webkit-box-shadow 0.4s;
+  position: relative;
+}
+.plan.payment input[type="radio"]:checked + .plan-content:after {
+  top: 12px;
+  right: 14px;
+}
+.plan input[type="radio"]:checked + .plan-content.insurance:after {
+  top: 18px !important;
+  right: 14px !important;
+  width: 9px;
+  height: 9px;
+}
+.plan input[type="radio"]:checked + .plan-content {
+  border: 1.9px solid #649ccb;
+  background: #e2edde;
+  -webkit-transition: ease-in 0.3s;
+  -o-transition: ease-in 0.3s;
+  transition: ease-in 0.3s;
+}
+.plan.payment input[type="radio"]:checked + .plan-content {
+  border: 1.9px solid #649ccb;
+  background: #fff;
+  transition: ease-in 0.3s;
+}

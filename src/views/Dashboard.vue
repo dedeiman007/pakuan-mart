@@ -183,7 +183,7 @@
         <div class="mt-3">
           <button
             class="btn btn-primary w-100"
-            @click="checkout()"
+            @click="openModalCheckout()"
             :disabled="carts.length <= 0"
           >
             <template v-if="is_checkout == true">
@@ -201,12 +201,96 @@
         </div>
       </div>
     </div>
+    <div class="modal-vue">
+      <div class="overlay" v-if="modalCheckout"></div>
+      <div class="modal-body-chat sm" v-if="modalCheckout">
+        <div class="d-flex bd-highlight align-items-lg-center">
+          <div class="flex-grow-1 bd-highlight">
+            <h5 class="mb-0 fw-bold">Select Bank Payment</h5>
+          </div>
+        </div>
+        <div class="text-gray">Select Bank Payment to Continue Checkout</div>
+        <div class="row mt-3">
+          <template v-for="(item, index) in payment_lists">
+            <div class="col-md-6 mt-3" :key="index">
+              <label class="plan payment" :for="item.value">
+                <input
+                  type="radio"
+                  :id="item.value"
+                  name="bank-item"
+                  v-model="item_bank"
+                  :value="item"
+                />
+                <div class="plan-content text-center capitalize fw-bold p-2">
+                  <img :src="item.image" width="100" alt="" />
+                  <div class="mt-2 text-gray">
+                    {{ item.no_rek }}
+                  </div>
+                </div>
+              </label>
+            </div>
+          </template>
+        </div>
+        <div class="mt-3" v-if="item_bank">
+          <div>
+            <label class="mb-1 fw-semibold">Upload Invoice</label>
+          </div>
+          <label type="file" :class="!imagePhoto ? 'upload__btn' : ''">
+            <img v-if="imagePhoto" class="photo" :src="paymentPictureUrl" />
+            <p v-else class="mb-0" style="color: #adb5bd">
+              <i class="fa fa-plus"></i>
+            </p>
+            <input
+              class="cursor-pointer"
+              id="upload"
+              type="file"
+              name="file"
+              ref="file"
+              @change="uploadPhoto"
+            />
+          </label>
+        </div>
+        <hr />
+        <div class="mt-3 row">
+          <div class="col-md-6">
+            <button
+              class="btn btn-outline-primary btn-lg w-100"
+              @click="modalCheckout = false"
+            >
+              Cancel
+            </button>
+          </div>
+          <div class="col-md-6">
+            <button
+              class="btn btn-primary btn-lg w-100"
+              :disabled="item_bank == null || req.photo == ''"
+              @click="checkoutPayment()"
+            >
+              <template v-if="is_checkout == true">
+                <div class="d-flex align-items-center justify-content-center">
+                  <span
+                    class="spinner-border spinner-border-sm"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
+                  <span class="ms-1">Loading...</span>
+                </div>
+              </template>
+              <template v-else> Continue </template>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import Api from "../api/Api";
 import moment from "moment";
+import bca from "../assets/bca.png";
+import mandiri from "../assets/mandiri.png";
+import noImage from "../assets/no-photo.png";
 
 export default {
   name: "DashboardPage",
@@ -219,6 +303,21 @@ export default {
       tax: {},
       total_price: 0,
       is_checkout: false,
+      modalCheckout: false,
+      payment_lists: [
+        { name: "Bank BCA", value: "bca", image: bca, no_rek: "0953657128" },
+        {
+          name: "Bank Mandiri",
+          value: "mandiri",
+          image: mandiri,
+          no_rek: "1240011353597",
+        },
+      ],
+      item_bank: null,
+      imagePhoto: "",
+      req: {
+        photo: "",
+      },
     };
   },
   created() {
@@ -226,6 +325,17 @@ export default {
     this.getCartList();
   },
   methods: {
+    uploadPhoto(event) {
+      var input = event.target;
+      this.req.photo = input.files[0];
+      if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = (e) => {
+          this.imagePhoto = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    },
     getTax() {
       Api.get(`/tax`)
         .then((res) => {
@@ -432,20 +542,44 @@ export default {
           }
         });
     },
-    checkout() {
+    openModalCheckout() {
+      console.log("ada");
+      this.modalCheckout = true;
+    },
+    checkoutPayment() {
       this.is_checkout = true;
       const selectedCarts = this.carts.map((item) => ({
         id: item.product_id,
         qty: item.qty,
       }));
-      var data = {
-        products: selectedCarts,
-        user_id: `${localStorage.getItem("user_id")}`,
-        total: this.total_price,
-        service: this.tax.service,
-        tax: this.tax.tax,
-        sub_total: (this.total_price * 15) / 100 + this.total_price,
-      };
+      var data = new FormData();
+      selectedCarts.forEach((item, itemIndex) => {
+        for (const key in item) {
+          if (Array.isArray(item[key])) {
+            item[key].forEach((handlingItem, handlingIndex) => {
+              data.append(
+                `products[${itemIndex}][${key}][${handlingIndex}]`,
+                handlingItem
+              );
+            });
+          } else {
+            data.append(`products[${itemIndex}][${key}]`, item[key]);
+          }
+        }
+      });
+      data.append("user_id", `${localStorage.getItem("user_id")}`);
+      data.append("total", this.total_price);
+      data.append("service", this.tax.service);
+      data.append("tax", this.tax.tax);
+      data.append("bank", this.item_bank.name);
+      data.append("no_rek", this.item_bank.no_rek);
+      data.append(
+        "sub_total",
+        (this.total_price * 15) / 100 + this.total_price
+      );
+      if (this.req.photo) {
+        data.append("payment_proof", this.req.photo);
+      }
 
       Api.post(`transaction`, data, {
         headers: {
@@ -495,6 +629,11 @@ export default {
           }
           this.is_checkout = false;
         });
+    },
+  },
+  computed: {
+    paymentPictureUrl() {
+      return this.imagePhoto.length > 0 ? this.imagePhoto : noImage;
     },
   },
 };
@@ -560,5 +699,40 @@ button.plus-minus[disabled] {
   left: 0;
   border-radius: 1rem;
   opacity: 0.8;
+}
+.upload__btn {
+  color: #dee2e6;
+  text-align: center;
+  cursor: pointer;
+  background-color: #ffffff;
+  border: dashed;
+  border-radius: 10px;
+  width: 13vw;
+  height: 150px;
+  padding: 55px;
+  position: relative;
+}
+.photo {
+  border-radius: 10px;
+  cursor: pointer;
+  width: 13vw;
+  height: 150px;
+  object-fit: cover;
+  border: dashed;
+  color: #dee2e6;
+}
+.btn-lg {
+  width: 150px;
+}
+input[type="file"] {
+  display: none;
+}
+.upload__btn p i {
+  font-size: 30px;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 </style>

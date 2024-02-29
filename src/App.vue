@@ -3,6 +3,9 @@
 </template>
 
 <script>
+import "./assets/js/summernote-lite.js";
+import "./assets/css/summernote-lite.css";
+
 export default {
   name: "App",
   data() {

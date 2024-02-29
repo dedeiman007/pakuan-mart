@@ -69,7 +69,9 @@
                       />
                     </center>
                   </td>
-                  <td>{{ data.description }}</td>
+                  <td>
+                    <div v-html="data.description"></div>
+                  </td>
                   <td>
                     <center>
                       <a :href="`/edit-product/${data.id}`" class="me-2">
