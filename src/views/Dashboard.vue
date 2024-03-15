@@ -34,10 +34,11 @@
               </div>
               <center>
                 <img :src="data.images[0].image" class="img-product" alt="" />
-                <h6 class="mb-0 fw-bold mt-2">{{ data.name }}</h6>
-                <p class="size-14">{{ currencyFormat(data.price) }}</p>
               </center>
-              <div class="mt-3">
+              <h6 class="mb-0 fw-bold mt-2">{{ data.name }}</h6>
+              <p class="size-14 mb-0">{{ currencyFormat(data.price) }}</p>
+              <div class="tag-html size-12" v-html="data.description"></div>
+              <div class="mt-2">
                 <button class="btn btn-primary w-100" @click="addCart(data.id)">
                   Add to Chart
                 </button>
@@ -206,13 +207,15 @@
       <div class="modal-body-chat sm" v-if="modalCheckout">
         <div class="d-flex bd-highlight align-items-lg-center">
           <div class="flex-grow-1 bd-highlight">
-            <h5 class="mb-0 fw-bold">Select Bank Payment</h5>
+            <h5 class="mb-0 fw-bold">Select Bank Payment & Shipping</h5>
           </div>
         </div>
-        <div class="text-gray">Select Bank Payment to Continue Checkout</div>
+        <div class="text-gray">
+          Select Bank Payment & Shipping Method to Checkout
+        </div>
         <div class="row mt-3">
           <template v-for="(item, index) in payment_lists">
-            <div class="col-md-6 mt-3" :key="index">
+            <div class="col-md-6 mt-2" :key="index">
               <label class="plan payment" :for="item.value">
                 <input
                   type="radio"
@@ -230,8 +233,31 @@
               </label>
             </div>
           </template>
+          <template v-for="(item, index) in shipping_lists">
+            <div class="col-md-6 mt-3" :key="index">
+              <label class="plan payment" :for="item.value">
+                <input
+                  type="radio"
+                  :id="item.value"
+                  name="bank-shipping"
+                  v-model="item_shipping"
+                  :value="item"
+                />
+                <div class="plan-content text-center capitalize fw-bold p-2">
+                  <img
+                    :src="item.image"
+                    width="100"
+                    v-bind:class="{
+                      'pt-jne pb-jne': item.name == 'JNE',
+                    }"
+                    alt=""
+                  />
+                </div>
+              </label>
+            </div>
+          </template>
         </div>
-        <div class="mt-3" v-if="item_bank">
+        <div class="mt-3" v-if="item_bank && item_shipping">
           <div>
             <label class="mb-1 fw-semibold">Upload Invoice</label>
           </div>
@@ -263,7 +289,9 @@
           <div class="col-md-6">
             <button
               class="btn btn-primary btn-lg w-100"
-              :disabled="item_bank == null || req.photo == ''"
+              :disabled="
+                item_bank == null || item_shipping == null || req.photo == ''
+              "
               @click="checkoutPayment()"
             >
               <template v-if="is_checkout == true">
@@ -291,6 +319,8 @@ import moment from "moment";
 import bca from "../assets/bca.png";
 import mandiri from "../assets/mandiri.png";
 import noImage from "../assets/no-photo.png";
+import JNE from "../assets/jne.svg";
+import JNT from "../assets/jnt.png";
 
 export default {
   name: "DashboardPage",
@@ -313,7 +343,16 @@ export default {
           no_rek: "1240011353597",
         },
       ],
+      shipping_lists: [
+        { name: "JNE", value: "JNE", image: JNE },
+        {
+          name: "JNT",
+          value: "JNT",
+          image: JNT,
+        },
+      ],
       item_bank: null,
+      item_shipping: null,
       imagePhoto: "",
       req: {
         photo: "",
@@ -572,6 +611,7 @@ export default {
       data.append("service", this.tax.service);
       data.append("tax", this.tax.tax);
       data.append("bank", this.item_bank.name);
+      data.append("courier", this.item_shipping.value);
       data.append("no_rek", this.item_bank.no_rek);
       data.append(
         "sub_total",
@@ -734,5 +774,11 @@ input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+.pt-jne {
+  padding-top: 9px;
+}
+.pb-jne {
+  padding-bottom: 9px;
 }
 </style>

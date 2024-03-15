@@ -34,11 +34,11 @@
               >
             </div>
           </div>
-          <div class="table-responsive-custom">
-            <div class="mt-4" v-if="is_load">
-              <ListLoader />
-            </div>
-            <table class="table table-bordered mt-4" v-else>
+          <div class="mt-4" v-if="is_load">
+            <ListLoader />
+          </div>
+          <div class="table-responsive-custom" v-else>
+            <table class="table table-bordered mt-4">
               <thead class="table-light">
                 <tr>
                   <th class="text-center" style="width: 40px" scope="col">
@@ -73,14 +73,14 @@
                 </tr>
               </tbody>
             </table>
-          </div>
-          <div v-if="filterDataList.length == 0">
-            <center>
-              <div class="mt-4">
-                <img src="../assets/no-data.png" width="60" alt="" />
-                <div class="size-16 fw-medium mt-2 text-gray">No Result</div>
-              </div>
-            </center>
+            <div v-if="filterDataList.length == 0">
+              <center>
+                <div class="mt-4">
+                  <img src="../assets/no-data.png" width="60" alt="" />
+                  <div class="size-16 fw-medium mt-2 text-gray">No Result</div>
+                </div>
+              </center>
+            </div>
           </div>
         </div>
       </div>
